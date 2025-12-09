@@ -1,0 +1,17 @@
+{
+  "name": "procom",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "turbo": "^2.6.3"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev"
+  },
+  "packageManager": "npm@11.5.1"
+}
