@@ -1,8 +1,4 @@
 export class ApiSuccessResponse {
-    success;
-    statusCode;
-    message;
-    data;
     constructor(success, statusCode, message, data) {
         this.success = success;
         this.statusCode = statusCode;

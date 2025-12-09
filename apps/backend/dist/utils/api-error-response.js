@@ -1,8 +1,4 @@
 export class ApiErrorResponse extends Error {
-    statusCode;
-    message;
-    errors;
-    stack;
     constructor(statusCode, message, errors = [], stack) {
         super(message);
         this.statusCode = statusCode;
