@@ -1,23 +1,12 @@
 export class ApiErrorResponse extends Error {
-	statusCode: number;
-	message: string;
-	errors: any[];
-	stack?: string | undefined;
+	public readonly statusCode: number;
+	public readonly errors: any[];
 
-	constructor(
-		statusCode: number,
-		message: string,
-		errors: any[] = [],
-		stack?: string | undefined,
-	) {
+	constructor(statusCode: number, message: string, errors: unknown[] = []) {
 		super(message);
 		this.statusCode = statusCode;
-		this.message = message;
 		this.errors = errors;
-		if (stack) {
-			this.stack = stack;
-		} else {
-			Error.captureStackTrace(this, this.constructor);
-		}
+
+		Error.captureStackTrace(this, this.constructor);
 	}
 }
