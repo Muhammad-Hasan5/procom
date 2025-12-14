@@ -1,6 +1,6 @@
 export class ApiErrorResponse extends Error {
 	public readonly statusCode: number;
-	public readonly errors: any[];
+	public readonly errors: unknown[];
 
 	constructor(statusCode: number, message: string, errors: unknown[] = []) {
 		super(message);
