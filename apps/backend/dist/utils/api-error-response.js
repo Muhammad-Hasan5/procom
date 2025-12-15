@@ -1,14 +1,8 @@
 export class ApiErrorResponse extends Error {
-    constructor(statusCode, message, errors = [], stack) {
+    constructor(statusCode, message, errors = []) {
         super(message);
         this.statusCode = statusCode;
-        this.message = message;
         this.errors = errors;
-        if (stack) {
-            this.stack = stack;
-        }
-        else {
-            Error.captureStackTrace(this, this.constructor);
-        }
+        Error.captureStackTrace(this, this.constructor);
     }
 }
