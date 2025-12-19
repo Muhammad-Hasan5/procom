@@ -36,6 +36,11 @@ export const taskSchema = new Schema<ITaskDocument>(
 	},
 );
 
+taskSchema.index({
+	title: "text",
+	description: "text",
+});
+
 export const Task = mongoose.model<ITaskDocument, ITaskModel>(
 	"Task",
 	taskSchema,

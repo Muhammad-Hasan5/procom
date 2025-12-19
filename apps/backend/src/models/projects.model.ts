@@ -1,5 +1,8 @@
 import mongoose, { Schema, Types } from "mongoose";
-import { IProjectDocument, IProjectModel } from "../types/ProjectsModel.types.js";
+import {
+	IProjectDocument,
+	IProjectModel,
+} from "../types/ProjectsModel.types.js";
 
 const projectSchema = new Schema<IProjectDocument>(
 	{
@@ -21,6 +24,11 @@ const projectSchema = new Schema<IProjectDocument>(
 		timestamps: true,
 	},
 );
+
+projectSchema.index({
+	title: "text",
+	description: "text",
+});
 
 export const Project = mongoose.model<IProjectDocument, IProjectModel>(
 	"Project",
