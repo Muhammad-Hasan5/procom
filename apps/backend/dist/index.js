@@ -5,8 +5,9 @@ dotenv.config({
 });
 import app from "./app.js";
 import { connectDB } from "./db/index.db.js";
+import { initRedis } from "./config/redis.js";
 let port = process.env.PORT;
-connectDB()
+await connectDB()
     .then(() => {
     app.listen(port, () => {
         console.log(`Server is running on http://localhost:${port}`);
@@ -15,3 +16,4 @@ connectDB()
     .catch((error) => {
     console.error("Something went wrong with Database", error);
 });
+await initRedis();
