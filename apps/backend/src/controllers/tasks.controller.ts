@@ -7,6 +7,7 @@ import { Types } from "mongoose";
 import { User } from "../models/users.model.js";
 import { UserDocument } from "../types/UserModel.types.js";
 import { TaskDocument } from "../types/TasksModel.types.js";
+import { invalidateProjectOverviewCache } from "../cache/projectOverview.cache.js";
 
 export const createTask = asyncHandler(async (req: Request, res: Response) => {
 	if (!req.user?._id || !Types.ObjectId.isValid(req.user._id)) {
@@ -72,6 +73,8 @@ export const createTask = asyncHandler(async (req: Request, res: Response) => {
 	if (!task) {
 		throw new ApiErrorResponse(400, `Error creating new Task => ${task}`);
 	}
+
+	await invalidateProjectOverviewCache(project._id);
 
 	res.status(201).json(
 		new ApiSuccessResponse<TaskDocument>(true, 201, "Task created successfully", task),
@@ -236,6 +239,8 @@ export const updateTask = asyncHandler(async (req: Request, res: Response) => {
 		throw new ApiErrorResponse(400, "error updating task");
 	}
 
+	await invalidateProjectOverviewCache(project._id);
+
 	res.status(201).json(
 		new ApiSuccessResponse<TaskDocument>(
 			true,
@@ -288,6 +293,8 @@ export const changeTaskStatus = asyncHandler(
 			throw new ApiErrorResponse(400, "Error updating the status");
 		}
 
+		await invalidateProjectOverviewCache(project._id);
+
 		res.status(200).json(
 			new ApiSuccessResponse<TaskDocument>(
 				true,
@@ -328,6 +335,8 @@ export const deleteTask = asyncHandler(async (req: Request, res: Response) => {
 	if (!deletedTask) {
 		throw new ApiErrorResponse(400, "Unable to delete task");
 	}
+
+	await invalidateProjectOverviewCache(project._id);
 
 	res.status(200).json(
 		new ApiSuccessResponse<TaskDocument>(

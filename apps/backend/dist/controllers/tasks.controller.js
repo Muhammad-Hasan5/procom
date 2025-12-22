@@ -4,6 +4,7 @@ import { ApiErrorResponse } from "../utils/api-error-response.js";
 import { ApiSuccessResponse } from "../utils/api-success-response.js";
 import { Types } from "mongoose";
 import { User } from "../models/users.model.js";
+import { invalidateProjectOverviewCache } from "../cache/projectOverview.cache.js";
 export const createTask = asyncHandler(async (req, res) => {
     if (!req.user?._id || !Types.ObjectId.isValid(req.user._id)) {
         throw new ApiErrorResponse(400, "Invalid user ID");
@@ -50,6 +51,7 @@ export const createTask = asyncHandler(async (req, res) => {
     if (!task) {
         throw new ApiErrorResponse(400, `Error creating new Task => ${task}`);
     }
+    await invalidateProjectOverviewCache(project._id);
     res.status(201).json(new ApiSuccessResponse(true, 201, "Task created successfully", task));
 });
 export const getProjectTasks = asyncHandler(async (req, res) => {
@@ -145,6 +147,7 @@ export const updateTask = asyncHandler(async (req, res) => {
     if (!updatedTask) {
         throw new ApiErrorResponse(400, "error updating task");
     }
+    await invalidateProjectOverviewCache(project._id);
     res.status(201).json(new ApiSuccessResponse(true, 201, "Task created successfully", updatedTask));
 });
 export const changeTaskStatus = asyncHandler(async (req, res) => {
@@ -172,6 +175,7 @@ export const changeTaskStatus = asyncHandler(async (req, res) => {
     if (!updatedStatusTask) {
         throw new ApiErrorResponse(400, "Error updating the status");
     }
+    await invalidateProjectOverviewCache(project._id);
     res.status(200).json(new ApiSuccessResponse(true, 200, "task's status change successfully", updatedStatusTask));
 });
 export const deleteTask = asyncHandler(async (req, res) => {
@@ -197,5 +201,6 @@ export const deleteTask = asyncHandler(async (req, res) => {
     if (!deletedTask) {
         throw new ApiErrorResponse(400, "Unable to delete task");
     }
+    await invalidateProjectOverviewCache(project._id);
     res.status(200).json(new ApiSuccessResponse(true, 200, "task deleted successfully", deletedTask));
 });
