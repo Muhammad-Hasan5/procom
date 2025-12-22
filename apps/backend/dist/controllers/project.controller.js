@@ -5,6 +5,9 @@ import { ApiErrorResponse } from "../utils/api-error-response.js";
 import { ApiSuccessResponse } from "../utils/api-success-response.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import { Types } from "mongoose";
+import { getprojectListCache, invalidateProjectListCache, setProjectListCache, } from "../cache/projectList.cache.js";
+import { getProjectOverviewCache, invalidateProjectOverviewCache, setProjectOverviewCache, } from "../cache/projectOverview.cache.js";
+import { buildProjectOverviewFromDB } from "../services/project.services.js";
 export const createProject = asyncHandler(async (req, res) => {
     const { title, description } = req.body;
     if (!title) {
@@ -18,7 +21,11 @@ export const createProject = asyncHandler(async (req, res) => {
         description,
         owner: req.user._id,
     });
+    if (!project) {
+        throw new ApiErrorResponse(409, "unable to create project");
+    }
     await project.save();
+    await invalidateProjectListCache(req.user?._id);
     return res
         .status(201)
         .json(new ApiSuccessResponse(true, 201, "Project created successfully", project));
@@ -32,6 +39,7 @@ export const getSingleProject = asyncHandler(async (req, res) => {
     }
     res.status(200).json(new ApiSuccessResponse(true, 200, "Project found", req.project));
 });
+//"DONE" refactor according to redis cache
 export const getUserProjects = asyncHandler(async (req, res) => {
     if (!req.user?._id || !Types.ObjectId.isValid(req.user._id)) {
         throw new ApiErrorResponse(400, "Invalid user ID");
@@ -46,15 +54,23 @@ export const getUserProjects = asyncHandler(async (req, res) => {
         }, { score: { $meta: "textScore" } }).sort({ score: { $meta: "textScore" } });
     }
     else {
+        const cached = await getprojectListCache(userId);
+        if (cached) {
+            return res
+                .status(200)
+                .json(new ApiSuccessResponse(true, 200, "Project found", JSON.parse(cached)));
+        }
         projects = await Project.find({
             owner: userId,
         });
+        await setProjectListCache(userId, projects);
     }
     if (!projects) {
         throw new ApiErrorResponse(404, "Project not found");
     }
     res.status(200).json(new ApiSuccessResponse(true, 200, "Project found", projects));
 });
+//"DONE" refactor according to redis cache
 export const updateProject = asyncHandler(async (req, res) => {
     if (!req.user?._id || !Types.ObjectId.isValid(req.user._id)) {
         throw new ApiErrorResponse(400, "Invalid user ID");
@@ -82,7 +98,7 @@ export const updateProject = asyncHandler(async (req, res) => {
         if (!users.length) {
             throw new ApiErrorResponse(404, "New members not found by provided emails");
         }
-        const userIds = users.map(u => u._id);
+        const userIds = users.map((u) => u._id);
         const existingMembers = req.project?.members ?? [];
         newMembers = [...new Set([...existingMembers, ...userIds])];
     }
@@ -92,8 +108,11 @@ export const updateProject = asyncHandler(async (req, res) => {
     if (!updatedproject) {
         throw new ApiErrorResponse(400, "unable to update the project");
     }
+    await invalidateProjectListCache(userId);
+    await invalidateProjectOverviewCache(projectId);
     res.status(200).json(new ApiSuccessResponse(true, 200, "Project updated successfully", updatedproject));
 });
+//"DONE" refactor according to redis cache
 export const deleteProject = asyncHandler(async (req, res) => {
     if (!req.user?._id || !Types.ObjectId.isValid(req.user._id)) {
         throw new ApiErrorResponse(400, "Invalid user ID");
@@ -119,6 +138,8 @@ export const deleteProject = asyncHandler(async (req, res) => {
     if (!deletedProjectNotes) {
         throw new ApiErrorResponse(404, "project have no notes or error deleting");
     }
+    await invalidateProjectListCache(userId);
+    await invalidateProjectOverviewCache(projectId);
     res.status(200).json(new ApiSuccessResponse(true, 200, "Project deleted successfully", {
         deletedProject,
         deletedProjectNotes,
@@ -150,6 +171,7 @@ export const addMemberToProject = asyncHandler(async (req, res) => {
     project.members?.push(memberUser._id);
     await project.save();
     await project.populate([{ path: "owner" }, { path: "members" }]);
+    await invalidateProjectOverviewCache(project._id);
     res.status(200).json(new ApiSuccessResponse(true, 200, "Member added to project successfully", project));
 });
 export const removeMemberFromProject = asyncHandler(async (req, res) => {
@@ -178,5 +200,30 @@ export const removeMemberFromProject = asyncHandler(async (req, res) => {
     project.members = project.members?.filter((memberId) => memberId.toString() !== memberUser._id.toString());
     await project.save();
     await project.populate([{ path: "owner" }, { path: "members" }]);
+    await invalidateProjectOverviewCache(project._id);
     res.status(200).json(new ApiSuccessResponse(true, 200, "Member removed from project successfully", project));
+});
+export const getProjectOverview = asyncHandler(async (req, res) => {
+    if (!req.user?._id || !Types.ObjectId.isValid(req.user._id)) {
+        throw new ApiErrorResponse(400, "Invalid user ID");
+    }
+    if (!req.project?._id || !Types.ObjectId.isValid(req.project._id)) {
+        throw new ApiErrorResponse(400, "Invalid project ID");
+    }
+    const userId = req.user._id;
+    const projectId = req.project._id;
+    const cached = await getProjectOverviewCache(projectId);
+    if (!cached) {
+        const projectOverview = await buildProjectOverviewFromDB(userId, projectId);
+        if (!projectOverview) {
+            throw new ApiErrorResponse(409, "Unable to build project overview from DB");
+        }
+        await setProjectOverviewCache(projectId, projectOverview);
+        return res
+            .status(201)
+            .json(new ApiSuccessResponse(true, 201, "Project overview build", projectOverview));
+    }
+    return res
+        .status(200)
+        .json(new ApiSuccessResponse(true, 200, "project overview sended", JSON.parse(cached)));
 });
