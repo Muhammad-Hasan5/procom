@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createProject, updateProject, deleteProject, getSingleProject, getUserProjects, addMemberToProject, removeMemberFromProject, } from "../controllers/project.controller.js";
+import { createProject, updateProject, deleteProject, getSingleProject, getUserProjects, addMemberToProject, removeMemberFromProject, getProjectOverview, } from "../controllers/project.controller.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { projectValidator } from "../validators/project.validator.js";
 import { validate } from "../middlewares/validators.middleware.js";
@@ -16,6 +16,10 @@ router
     .get(authMiddleware, canAccessProject, getSingleProject)
     .patch(authMiddleware, canAccessProject, projectValidator(), validate, updateProject)
     .delete(authMiddleware, canAccessProject, deleteProject);
+//project overview
+router
+    .route("/projects/:projectId/overview")
+    .get(authMiddleware, canAccessProject, getProjectOverview);
 // Manage project members
 router
     .route("/projects/:projectId/members")

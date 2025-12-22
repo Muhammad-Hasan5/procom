@@ -7,6 +7,7 @@ import {
 	getUserProjects,
 	addMemberToProject,
 	removeMemberFromProject,
+	getProjectOverview,
 } from "../controllers/project.controller.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { projectValidator } from "../validators/project.validator.js";
@@ -18,7 +19,7 @@ const router = Router();
 // Create & get all projects of logged-in user
 router
 	.route("/projects")
-	.post(authMiddleware, projectValidator(),validate, createProject)
+	.post(authMiddleware, projectValidator(), validate, createProject)
 	.get(authMiddleware, getUserProjects);
 
 // Get, update, delete one project
@@ -33,6 +34,11 @@ router
 		updateProject,
 	)
 	.delete(authMiddleware, canAccessProject, deleteProject);
+
+//project overview
+router
+	.route("/projects/:projectId/overview")
+	.get(authMiddleware, canAccessProject, getProjectOverview);
 
 // Manage project members
 router
