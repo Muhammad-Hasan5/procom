@@ -3,7 +3,9 @@ import { ApiSuccessResponse } from "../utils/api-success-response.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import { Note } from "../models/notes.model.js";
 import { Request, Response } from "express";
-import { INoteDocument, NoteDocument } from "../types/NotesModel.types.js";
+import { NoteDocument } from "../types/NotesModel.types.js";
+import { invalidateProjectOverviewCache } from "../cache/projectOverview.cache.js";
+import { Types } from "mongoose";
 
 export const createNote = asyncHandler(async (req: Request, res: Response) => {
 	const { title, content } = req.body;
@@ -19,9 +21,22 @@ export const createNote = asyncHandler(async (req: Request, res: Response) => {
 		project: req.project?._id,
 	});
 
+	if (!note) {
+		throw new ApiErrorResponse(401, "Error creating note");
+	}
+
+	await invalidateProjectOverviewCache(req.project?._id as Types.ObjectId);
+
 	return res
-		.status(200)
-		.json(new ApiSuccessResponse<NoteDocument>(true, 200, "Note created", note));
+		.status(201)
+		.json(
+			new ApiSuccessResponse<NoteDocument>(
+				true,
+				201,
+				"Note created",
+				note,
+			),
+		);
 });
 
 export const getNote = asyncHandler(async (req: Request, res: Response) => {
@@ -88,6 +103,9 @@ export const updateNote = asyncHandler(async (req: Request, res: Response) => {
 
 	await note?.save();
 
+	await invalidateProjectOverviewCache(req.project?._id as Types.ObjectId);
+
+
 	return res
 		.status(200)
 		.json(
@@ -109,6 +127,9 @@ export const deleteNote = asyncHandler(async (req: Request, res: Response) => {
 	if (!deletedNote) {
 		throw new ApiErrorResponse(404, "Unable to delete the note");
 	}
+
+	await invalidateProjectOverviewCache(req.project?._id as Types.ObjectId);
+
 
 	return res
 		.status(200)

@@ -2,6 +2,7 @@ import { ApiErrorResponse } from "../utils/api-error-response.js";
 import { ApiSuccessResponse } from "../utils/api-success-response.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import { Note } from "../models/notes.model.js";
+import { invalidateProjectOverviewCache } from "../cache/projectOverview.cache.js";
 export const createNote = asyncHandler(async (req, res) => {
     const { title, content } = req.body;
     if (!title) {
@@ -13,9 +14,13 @@ export const createNote = asyncHandler(async (req, res) => {
         user: req.user?._id,
         project: req.project?._id,
     });
+    if (!note) {
+        throw new ApiErrorResponse(401, "Error creating note");
+    }
+    await invalidateProjectOverviewCache(req.project?._id);
     return res
-        .status(200)
-        .json(new ApiSuccessResponse(true, 200, "Note created", note));
+        .status(201)
+        .json(new ApiSuccessResponse(true, 201, "Note created", note));
 });
 export const getNote = asyncHandler(async (req, res) => {
     const note = req.note;
@@ -53,6 +58,7 @@ export const updateNote = asyncHandler(async (req, res) => {
     if (content)
         note.content = content;
     await note?.save();
+    await invalidateProjectOverviewCache(req.project?._id);
     return res
         .status(200)
         .json(new ApiSuccessResponse(true, 200, "note updated successfully", note));
@@ -65,6 +71,7 @@ export const deleteNote = asyncHandler(async (req, res) => {
     if (!deletedNote) {
         throw new ApiErrorResponse(404, "Unable to delete the note");
     }
+    await invalidateProjectOverviewCache(req.project?._id);
     return res
         .status(200)
         .json(new ApiSuccessResponse(true, 200, "Note deleted successfully", deletedNote));
