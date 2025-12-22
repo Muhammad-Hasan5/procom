@@ -108,7 +108,12 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 		.cookie("refreshToken", refreshToken, options)
 		.cookie("accessToken", accessToken, options)
 		.json(
-			new ApiSuccessResponse<any>(true, 200, "User logged in", loggedInUser),
+			new ApiSuccessResponse<any>(
+				true,
+				200,
+				"User logged in",
+				loggedInUser,
+			),
 		);
 });
 
@@ -135,7 +140,12 @@ export const logout = asyncHandler(async (req: Request, res: Response) => {
 		.clearCookie("accessToken", options)
 		.clearCookie("refreshToken", options)
 		.json(
-			new ApiSuccessResponse<null>(true, 200, "User logged out successfully", null),
+			new ApiSuccessResponse<null>(
+				true,
+				200,
+				"User logged out successfully",
+				null,
+			),
 		);
 });
 
@@ -211,7 +221,14 @@ export const resendEmailVerificationMail = asyncHandler(
 
 		return res
 			.status(200)
-			.json(new ApiSuccessResponse<null>(true, 200, "email send successfully", null));
+			.json(
+				new ApiSuccessResponse<null>(
+					true,
+					200,
+					"email send successfully",
+					null,
+				),
+			);
 	},
 );
 
@@ -306,7 +323,7 @@ export const forgotPasswordRequest = asyncHandler(
 					true,
 					200,
 					"forgot password request processed",
-					null
+					null,
 				),
 			);
 	},
@@ -353,7 +370,7 @@ export const resetForgotPassword = asyncHandler(
 					true,
 					200,
 					"password reset successfully",
-					null
+					null,
 				),
 			);
 	},
