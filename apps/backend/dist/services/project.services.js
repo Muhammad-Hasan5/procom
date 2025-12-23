@@ -22,7 +22,7 @@ export async function buildProjectOverviewFromDB(userId, projectId) {
     const project = await Project.findById(projectId);
     const projectMembers = await getProjectMembersFromDB(userId, projectId);
     const taskStats = await Task.aggregate([
-        { $match: { projectId } },
+        { $match: { _id: projectId } },
         {
             $group: {
                 _id: "$status",
