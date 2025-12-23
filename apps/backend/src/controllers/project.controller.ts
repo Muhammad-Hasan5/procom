@@ -11,12 +11,12 @@ import {
 	getprojectListCache,
 	invalidateProjectListCache,
 	setProjectListCache,
-} from "../cache/projectList.cache.js";
+} from "../cache/projects/projectList.cache.js";
 import {
 	getProjectOverviewCache,
 	invalidateProjectOverviewCache,
 	setProjectOverviewCache,
-} from "../cache/projectOverview.cache.js";
+} from "../cache/projects/projectOverview.cache.js";
 import { buildProjectOverviewFromDB } from "../services/project.services.js";
 
 export const createProject = asyncHandler(
@@ -115,12 +115,13 @@ export const getUserProjects = asyncHandler(
 			projects = await Project.find({
 				owner: userId,
 			});
-			await setProjectListCache(userId, projects);
 		}
 
 		if (!projects) {
 			throw new ApiErrorResponse(404, "Project not found");
 		}
+
+		await setProjectListCache(userId, projects);
 
 		res.status(200).json(
 			new ApiSuccessResponse<ProjectDocument[]>(
@@ -195,7 +196,7 @@ export const updateProject = asyncHandler(
 		}
 
 		await invalidateProjectListCache(userId);
-		await invalidateProjectOverviewCache(projectId)
+		await invalidateProjectOverviewCache(projectId);
 
 		res.status(200).json(
 			new ApiSuccessResponse<ProjectDocument>(
@@ -251,7 +252,7 @@ export const deleteProject = asyncHandler(
 		}
 
 		await invalidateProjectListCache(userId);
-		await invalidateProjectOverviewCache(projectId)
+		await invalidateProjectOverviewCache(projectId);
 
 		res.status(200).json(
 			new ApiSuccessResponse<object>(

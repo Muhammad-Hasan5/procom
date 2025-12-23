@@ -5,8 +5,8 @@ import { ApiErrorResponse } from "../utils/api-error-response.js";
 import { ApiSuccessResponse } from "../utils/api-success-response.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import { Types } from "mongoose";
-import { getprojectListCache, invalidateProjectListCache, setProjectListCache, } from "../cache/projectList.cache.js";
-import { getProjectOverviewCache, invalidateProjectOverviewCache, setProjectOverviewCache, } from "../cache/projectOverview.cache.js";
+import { getprojectListCache, invalidateProjectListCache, setProjectListCache, } from "../cache/projects/projectList.cache.js";
+import { getProjectOverviewCache, invalidateProjectOverviewCache, setProjectOverviewCache, } from "../cache/projects/projectOverview.cache.js";
 import { buildProjectOverviewFromDB } from "../services/project.services.js";
 export const createProject = asyncHandler(async (req, res) => {
     const { title, description } = req.body;
@@ -63,11 +63,11 @@ export const getUserProjects = asyncHandler(async (req, res) => {
         projects = await Project.find({
             owner: userId,
         });
-        await setProjectListCache(userId, projects);
     }
     if (!projects) {
         throw new ApiErrorResponse(404, "Project not found");
     }
+    await setProjectListCache(userId, projects);
     res.status(200).json(new ApiSuccessResponse(true, 200, "Project found", projects));
 });
 //"DONE" refactor according to redis cache
