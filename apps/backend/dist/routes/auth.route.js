@@ -3,26 +3,31 @@ import { register, login, logout, getCurrentUser, verifyEmail, resendEmailVerifi
 import { userRegistervalidator, userLoginValidator, changePasswordValidator, forgotPasswordValidator, resetPasswordValidator, } from "../validators/auth.validator.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { validate } from "../middlewares/validators.middleware.js";
+import { rateLimiter } from "../middlewares/rateLimiter.middleware.js";
 const router = Router();
 router
     .route("/register-user")
-    .post(userRegistervalidator(), validate, register);
-router.route("/login-user").post(userLoginValidator(), validate, login);
-router.route("/logout-user").post(authMiddleware, logout);
-router.route("/verify-email/:verificationToken").get(verifyEmail);
+    .post(rateLimiter, userRegistervalidator(), validate, register);
+router
+    .route("/login-user")
+    .post(rateLimiter, userLoginValidator(), validate, login);
+router.route("/logout-user").post(rateLimiter, authMiddleware, logout);
+router.route("/verify-email/:verificationToken").get(rateLimiter, verifyEmail);
 router
     .route("/resend-email-verification")
-    .post(authMiddleware, resendEmailVerificationMail);
+    .post(rateLimiter, authMiddleware, resendEmailVerificationMail);
 router.route("/refresh-token").post(renewAccessToken);
 router
     .route("/forgot-password")
-    .post(forgotPasswordValidator(), validate, forgotPasswordRequest);
+    .post(rateLimiter, forgotPasswordValidator(), validate, forgotPasswordRequest);
 router
     .route("/reset-password/:resetToken")
-    .patch(resetPasswordValidator(), validate, resetForgotPassword);
+    .patch(rateLimiter, resetPasswordValidator(), validate, resetForgotPassword);
 router
     .route("/change-password")
-    .patch(authMiddleware, changePasswordValidator(), validate, changeCurrentPassword);
-router.route("/get-current-user").get(authMiddleware, getCurrentUser);
-router.route("/delete-user").delete(authMiddleware, deleteUser);
+    .patch(rateLimiter, authMiddleware, changePasswordValidator(), validate, changeCurrentPassword);
+router
+    .route("/get-current-user")
+    .get(rateLimiter, authMiddleware, getCurrentUser);
+router.route("/delete-user").delete(rateLimiter, authMiddleware, deleteUser);
 export default router;
