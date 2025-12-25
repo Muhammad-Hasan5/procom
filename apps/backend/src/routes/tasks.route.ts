@@ -14,25 +14,34 @@ import { validate } from "../middlewares/validators.middleware.js";
 import { taskValidator } from "../validators/tasks.validator.js";
 import { canAccessProject } from "../middlewares/project.middleware.js";
 import { canAccessTask } from "../middlewares/task.middleware.js";
+import { rateLimiter } from "../middlewares/rateLimiter.middleware.js";
 
 const router = Router({ mergeParams: true });
 
 router
 	.route("/projects/:projectId/tasks")
 	.post(
+		rateLimiter,
 		authMiddleware,
 		canAccessProject,
 		taskValidator(),
 		validate,
 		createTask,
 	)
-	.get(authMiddleware, canAccessProject, getProjectTasks)
-	.get(authMiddleware, canAccessProject, canAccessTask, getUserTasks);
+	.get(rateLimiter, authMiddleware, canAccessProject, getProjectTasks)
+	.get(
+		rateLimiter,
+		authMiddleware,
+		canAccessProject,
+		canAccessTask,
+		getUserTasks,
+	);
 
 router
 	.route("/projects/:projectId/tasks/:taskId")
-	.get(authMiddleware, canAccessProject, canAccessTask, getTask)
+	.get(rateLimiter, authMiddleware, canAccessProject, canAccessTask, getTask)
 	.patch(
+		rateLimiter,
 		authMiddleware,
 		canAccessProject,
 		canAccessTask,
@@ -40,10 +49,22 @@ router
 		validate,
 		updateTask,
 	)
-	.delete(authMiddleware, canAccessProject, canAccessTask, deleteTask);
+	.delete(
+		rateLimiter,
+		authMiddleware,
+		canAccessProject,
+		canAccessTask,
+		deleteTask,
+	);
 
 router
 	.route("/projects/:projectId/tasks/:taskId/status")
-	.patch(authMiddleware, canAccessProject, canAccessTask, changeTaskStatus);
+	.patch(
+		rateLimiter,
+		authMiddleware,
+		canAccessProject,
+		canAccessTask,
+		changeTaskStatus,
+	);
 
 export default router;
