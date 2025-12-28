@@ -5,8 +5,8 @@ import { getRedis } from "../config/redis";
 
 const redis = getRedis();
 
-const WindowTimeInterval = 300;
-const MaxRequests = 50;
+const WindowTimeInterval = 1;
+const MaxRequests = 3;
 
 export const rateLimiter = asyncHandler(
 	async (req: Request, res: Response, next: NextFunction) => {
