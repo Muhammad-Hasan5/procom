@@ -33,12 +33,14 @@ import auth_Router from "./routes/auth.route.js";
 import notes_Router from "./routes/notes.route.js";
 import project_Router from "./routes/project.route.js";
 import task_Router from "./routes/tasks.route.js";
+import notification_Router from "./routes/notifications.route.js";
 
 app.use("/api/v1/healthcheck", healthcheck_Router);
 app.use("/api/v1/auth", auth_Router);
 app.use("/api/v1", notes_Router);
 app.use("/api/v1", project_Router);
 app.use("/api/v1", task_Router);
+app.use("/api/v1", notification_Router);
 
 app.get("/", (req: Request, res: Response) => {
 	res.send("welcome to Notion-Lite");
