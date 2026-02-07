@@ -11,7 +11,7 @@
 		"start": "node dist/index.js",
 		"build": "tsc"
 	},
-	"turbo":{
+	"turbo": {
 		"root": "."
 	},
 	"devDependencies": {
@@ -28,6 +28,7 @@
 	},
 	"dependencies": {
 		"@types/express": "^5.0.5",
+		"@types/ws": "^8.18.1",
 		"bcrypt": "^6.0.0",
 		"cookie-parser": "^1.4.7",
 		"cors": "^2.8.5",
@@ -36,6 +37,7 @@
 		"express-validator": "^7.3.1",
 		"jsonwebtoken": "^9.0.2",
 		"mongoose": "^9.0.0",
-		"resend": "^6.5.2"
+		"resend": "^6.5.2",
+		"ws": "^8.19.0"
 	}
 }
