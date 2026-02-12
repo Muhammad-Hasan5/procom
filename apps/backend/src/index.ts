@@ -13,7 +13,7 @@ dotenv.config({
 
 let port = Number(process.env.PORT);
 
-// redis cache
+//redis cache
 await initRedis();
 
 // websocket connection
@@ -30,3 +30,5 @@ await connectDB()
 	.catch((error) => {
 		console.error("Something went wrong with Database", error);
 	});
+
+

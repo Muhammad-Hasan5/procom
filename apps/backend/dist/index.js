@@ -9,7 +9,7 @@ dotenv.config({
     path: "C:/WebDevPro/procom/apps/backend/.env",
 });
 let port = Number(process.env.PORT);
-// redis cache
+//redis cache
 await initRedis();
 // websocket connection
 const server = createServer(app);
