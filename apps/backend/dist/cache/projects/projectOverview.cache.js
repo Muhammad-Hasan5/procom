@@ -1,5 +1,5 @@
 import { getRedis } from "../../config/redis.js";
-let redis = getRedis();
+let redis = await getRedis();
 export const PROJECT_OVERVIEW_TTL = 60; // 60 seconds
 export const getProjectOverviewCacheKey = (projectId) => {
     return `project:overview:${projectId}`;
