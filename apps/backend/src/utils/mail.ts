@@ -1,6 +1,13 @@
 import { Resend } from "resend";
+import dotenv from "dotenv";
 
-const resend = new Resend(process.env.RESEND_API_KEY as string);
+dotenv.config({
+	path: "C:/WebDevPro/procom/apps/backend/.env",
+});
+
+console.log(process.env.RESEND_API_KEY);
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendEmail = async ({
 	to,
