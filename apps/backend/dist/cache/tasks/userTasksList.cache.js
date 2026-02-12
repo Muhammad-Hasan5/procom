@@ -1,5 +1,5 @@
 import { getRedis } from "../../config/redis.js";
-let redis = getRedis();
+let redis = await getRedis();
 export const USER_TASKS_LIST_TTL = 60; // 60 seconds
 export const getUserTasksListKey = (userId, projectId) => {
     return `user:${userId}:taskslist:${projectId}`;
