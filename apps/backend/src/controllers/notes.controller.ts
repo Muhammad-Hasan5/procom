@@ -29,7 +29,7 @@ export const createNote = asyncHandler(async (req: Request, res: Response) => {
 	if (!note) {
 		throw new ApiErrorResponse(401, "Error creating note");
 	}
-
+	
 	await invalidateProjectOverviewCache(req.project?._id as Types.ObjectId);
 
 	await invalidateNotesListCache(req.project?._id as Types.ObjectId);
