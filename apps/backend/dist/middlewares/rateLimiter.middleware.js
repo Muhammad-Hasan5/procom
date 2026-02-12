@@ -1,7 +1,7 @@
 import { asyncHandler } from "../utils/async-handler";
 import { ApiErrorResponse } from "../utils/api-error-response";
 import { getRedis } from "../config/redis";
-const redis = getRedis();
+const redis = await getRedis();
 const WindowTimeInterval = 1;
 const MaxRequests = 3;
 export const rateLimiter = asyncHandler(async (req, res, next) => {
