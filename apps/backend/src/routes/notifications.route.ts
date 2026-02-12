@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { rateLimiter } from "../middlewares/rateLimiter.middleware";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import {
 	getNotifications,
@@ -12,15 +11,15 @@ const router = Router({ mergeParams: true });
 
 router
 	.route("/notificaitons")
-	.get(rateLimiter, authMiddleware, getNotifications)
-	.get(rateLimiter, authMiddleware, getUnreadCount);
+	.get(authMiddleware, getNotifications)
+	.get(authMiddleware, getUnreadCount);
 
 router
 	.route("/notifications/mark-read/:notification-id")
-	.patch(rateLimiter, authMiddleware, markAsRead);
+	.patch(authMiddleware, markAsRead);
 
 router
 	.route("/notifications/mark-all-as-read")
-	.patch(rateLimiter, authMiddleware, markAllAsRead);
+	.patch(authMiddleware, markAllAsRead);
 
 export default router;

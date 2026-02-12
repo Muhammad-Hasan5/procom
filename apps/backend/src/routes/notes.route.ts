@@ -14,7 +14,6 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { notesValidator } from "../validators/notes.validator.js";
 import { canAccessProject } from "../middlewares/project.middleware.js";
 import { canAccessNote } from "../middlewares/note.middleware.js";
-import { rateLimiter } from "../middlewares/rateLimiter.middleware.js";
 
 const router = Router({ mergeParams: true });
 
@@ -22,21 +21,19 @@ const router = Router({ mergeParams: true });
 router
 	.route("/project/:projectId/notes")
 	.post(
-		rateLimiter,
 		authMiddleware,
 		canAccessProject,
 		notesValidator(),
 		validate,
 		createNote,
 	)
-	.get(rateLimiter, authMiddleware, canAccessProject, getNotes); // search or get all notes
+	.get(authMiddleware, canAccessProject, getNotes); // search or get all notes
 
 // get single note, update note, delete note
 router
 	.route("/project/:projectId/notes/:noteId")
-	.get(rateLimiter, authMiddleware, canAccessProject, canAccessNote, getNote)
+	.get(authMiddleware, canAccessProject, canAccessNote, getNote)
 	.patch(
-		rateLimiter,
 		authMiddleware,
 		canAccessProject,
 		canAccessNote,
@@ -45,7 +42,6 @@ router
 		updateNote,
 	)
 	.delete(
-		rateLimiter,
 		authMiddleware,
 		canAccessProject,
 		canAccessNote,
@@ -56,7 +52,6 @@ router
 router
 	.route("/project/:projectId/notes/:noteId/archive")
 	.patch(
-		rateLimiter,
 		authMiddleware,
 		canAccessProject,
 		canAccessNote,
@@ -66,7 +61,6 @@ router
 router
 	.route("/project/:projectId/notes/:noteId/pin")
 	.patch(
-		rateLimiter,
 		authMiddleware,
 		canAccessProject,
 		canAccessNote,
