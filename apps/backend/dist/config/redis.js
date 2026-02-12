@@ -1,10 +1,19 @@
 import { createClient } from "redis";
+import dotenv from "dotenv";
+dotenv.config({
+    path: "C:/WebDevPro/procom/apps/backend/.env",
+});
 let redis = null;
+let redisURL = process.env.REDIS_URL;
+console.log(redisURL);
+if (!redisURL) {
+    throw new Error("there is issue with redis url");
+}
 export async function initRedis() {
     if (redis)
         return redis;
     redis = createClient({
-        url: process.env.REDIS_URL,
+        url: redisURL,
         socket: {
             reconnectStrategy: (retries) => {
                 const jitter = Math.floor(Math.random() * 100);
@@ -20,8 +29,8 @@ export async function initRedis() {
         .catch((err) => console.error("⚠️", err));
     return redis;
 }
-export function getRedis() {
+export async function getRedis() {
     if (redis)
         return redis;
-    throw new Error("Redis is not initialized");
+    return await initRedis();
 }
