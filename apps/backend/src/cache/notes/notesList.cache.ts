@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 import { getRedis } from "../../config/redis.js";
-let redis = getRedis();
+let redis = await getRedis();
 
 export const NOTES_LIST_TTL: number = 60; // 60 seconds
 
