@@ -1,5 +1,5 @@
 import { getRedis } from "../../config/redis";
-let redis = getRedis();
+let redis = await getRedis();
 export const NOTIFICATIONS_LIST_TTL = 60;
 export const getNotificationsListKey = (userId) => {
     return `notifications:list:${userId}`;

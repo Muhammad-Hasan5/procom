@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import { getRedis } from "../../config/redis";
 
-let redis = getRedis();
+let redis = await getRedis();
 
 export const NOTIFICATIONS_LIST_TTL = 60;
 
