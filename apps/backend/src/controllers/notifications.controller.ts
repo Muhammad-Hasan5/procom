@@ -4,32 +4,10 @@ import { Notification } from "../models/notifications.model";
 import { Request, Response } from "express";
 import { NotificationDocument } from "../types/NotificationsModel.types";
 import { ApiErrorResponse } from "../utils/api-error-response";
-import {
-	getNotificationsListCache,
-	invalidateNotificationsListCache,
-	setNotificationsListCache,
-} from "../cache/notifications/notifications.cache";
 import { Types } from "mongoose";
 
 export const getNotifications = asyncHandler(
 	async (req: Request, res: Response) => {
-		const cached = await getNotificationsListCache(
-			req.user?._id as Types.ObjectId,
-		);
-
-		if (cached) {
-			return res
-				.status(200)
-				.json(
-					new ApiSuccessResponse<object>(
-						true,
-						200,
-						"notifications fetched",
-						JSON.parse(cached),
-					),
-				);
-		}
-
 		const notifications = await Notification.find({
 			user: req.user?._id,
 		}).sort({ createdAt: -1 });
@@ -44,11 +22,6 @@ export const getNotifications = asyncHandler(
 					),
 				);
 		}
-
-		await setNotificationsListCache(
-			req.user?._id as Types.ObjectId,
-			notifications,
-		);
 
 		return res
 			.status(200)
@@ -80,8 +53,6 @@ export const markAsRead = asyncHandler(async (req: Request, res: Response) => {
 			);
 	}
 
-	await invalidateNotificationsListCache(req.user?._id as Types.ObjectId);
-
 	return res
 		.status(200)
 		.json(
@@ -103,8 +74,6 @@ export const markAllAsRead = asyncHandler(
 			},
 			{ read: true },
 		);
-
-		await invalidateNotificationsListCache(req.user?._id as Types.ObjectId);
 
 		return res
 			.status(200)

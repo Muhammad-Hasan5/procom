@@ -4,7 +4,6 @@ import dotenv from "dotenv";
 import app from "./app.js";
 import { createServer } from "http";
 import { connectDB } from "./db/index.db.js";
-import { initRedis } from "./config/redis.js";
 import { initWebSocket } from "./chat/index.js";
 
 dotenv.config({
@@ -13,8 +12,6 @@ dotenv.config({
 
 let port = Number(process.env.PORT);
 
-//redis cache
-await initRedis();
 
 // websocket connection
 const server = createServer(app);

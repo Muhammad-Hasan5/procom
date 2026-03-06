@@ -4,13 +4,6 @@ import { asyncHandler } from "../utils/async-handler.js";
 import { Note } from "../models/notes.model.js";
 import { Request, Response } from "express";
 import { NoteDocument } from "../types/NotesModel.types.js";
-import { invalidateProjectOverviewCache } from "../cache/projects/projectOverview.cache.js";
-import { Types } from "mongoose";
-import {
-	getNotesListCache,
-	invalidateNotesListCache,
-	setNotesListCache,
-} from "../cache/notes/notesList.cache.js";
 
 export const createNote = asyncHandler(async (req: Request, res: Response) => {
 	const { title, content } = req.body;
@@ -29,10 +22,7 @@ export const createNote = asyncHandler(async (req: Request, res: Response) => {
 	if (!note) {
 		throw new ApiErrorResponse(401, "Error creating note");
 	}
-	
-	await invalidateProjectOverviewCache(req.project?._id as Types.ObjectId);
 
-	await invalidateNotesListCache(req.project?._id as Types.ObjectId);
 
 	return res
 		.status(201)
@@ -75,21 +65,6 @@ export const getNotes = asyncHandler(async (req: Request, res: Response) => {
 			{ score: { $meta: "textScore" } },
 		).sort({ score: { $meta: "textScore" } });
 	} else {
-		const cached = await getNotesListCache(
-			req.project?._id as Types.ObjectId,
-		);
-		if (cached) {
-			return res
-				.status(200)
-				.json(
-					new ApiSuccessResponse<object>(
-						true,
-						200,
-						"cached notes list delivered",
-						JSON.parse(cached),
-					),
-				);
-		}
 		notes = await Note.find({ project: req.project?._id }).populate("user");
 	}
 
@@ -99,8 +74,6 @@ export const getNotes = asyncHandler(async (req: Request, res: Response) => {
 			"User either have no notes or there is problem while fetching",
 		);
 	}
-
-	await setNotesListCache(req.project?._id as Types.ObjectId, notes);
 
 	return res
 		.status(200)
@@ -127,10 +100,6 @@ export const updateNote = asyncHandler(async (req: Request, res: Response) => {
 
 	await note?.save();
 
-	await invalidateProjectOverviewCache(req.project?._id as Types.ObjectId);
-
-	await invalidateNotesListCache(req.project?._id as Types.ObjectId);
-
 	return res
 		.status(200)
 		.json(
@@ -152,10 +121,6 @@ export const deleteNote = asyncHandler(async (req: Request, res: Response) => {
 	if (!deletedNote) {
 		throw new ApiErrorResponse(404, "Unable to delete the note");
 	}
-
-	await invalidateProjectOverviewCache(req.project?._id as Types.ObjectId);
-
-	await invalidateNotesListCache(req.project?._id as Types.ObjectId);
 
 	return res
 		.status(200)

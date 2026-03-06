@@ -4,9 +4,6 @@ import { ApiErrorResponse } from "../utils/api-error-response.js";
 import { ApiSuccessResponse } from "../utils/api-success-response.js";
 import { Types } from "mongoose";
 import { User } from "../models/users.model.js";
-import { invalidateProjectOverviewCache } from "../cache/projects/projectOverview.cache.js";
-import { getProjectTasksListCache, invalidateProjectTasksListCache, setProjectTasksListCache, } from "../cache/tasks/projectTasksList.cache.js";
-import { getUserTasksListCache, invalidateUserTasksListCache, setUserTasksListCache, } from "../cache/tasks/userTasksList.cache.js";
 export const createTask = asyncHandler(async (req, res) => {
     if (!req.user?._id || !Types.ObjectId.isValid(req.user._id)) {
         throw new ApiErrorResponse(400, "Invalid user ID");
@@ -53,9 +50,6 @@ export const createTask = asyncHandler(async (req, res) => {
     if (!task) {
         throw new ApiErrorResponse(400, `Error creating new Task => ${task}`);
     }
-    await invalidateProjectOverviewCache(project._id);
-    await invalidateProjectTasksListCache(project._id);
-    await invalidateUserTasksListCache(assignedUser, project._id);
     res.status(201).json(new ApiSuccessResponse(true, 201, "Task created successfully", task));
 });
 export const getProjectTasks = asyncHandler(async (req, res) => {
@@ -67,12 +61,6 @@ export const getProjectTasks = asyncHandler(async (req, res) => {
     }
     const project = req.project;
     const projectId = project._id;
-    const cached = await getProjectTasksListCache(projectId);
-    if (cached) {
-        return res
-            .status(200)
-            .json(new ApiSuccessResponse(true, 200, "project's tasks lists fetched via cache", JSON.parse(cached)));
-    }
     const tasks = await Task.aggregate([
         { $match: { project: projectId } },
         {
@@ -90,7 +78,6 @@ export const getProjectTasks = asyncHandler(async (req, res) => {
     if (!tasks.length) {
         throw new ApiErrorResponse(400, "prject has no tasks or error fetching tasks");
     }
-    await setProjectTasksListCache(projectId, tasks);
     res.status(200).json(new ApiSuccessResponse(true, 200, "All project tasks fetched", tasks));
 });
 export const getUserTasks = asyncHandler(async (req, res) => {
@@ -106,10 +93,6 @@ export const getUserTasks = asyncHandler(async (req, res) => {
         project.members?.some((m) => m.toString() === userId.toString());
     if (!isUserInProject) {
         throw new ApiErrorResponse(403, "user is not in this project");
-    }
-    const cached = await getUserTasksListCache(userId, project._id);
-    if (cached) {
-        res.status(200).json(new ApiSuccessResponse(true, 200, "All user's tasks for this fetched", JSON.parse(cached)));
     }
     const userTasks = await Task.aggregate([
         { $match: { assignedTo: userId, project: project._id } },
@@ -128,7 +111,6 @@ export const getUserTasks = asyncHandler(async (req, res) => {
     if (!userTasks.length) {
         throw new ApiErrorResponse(404, "Either user have no task or error fetching");
     }
-    await setUserTasksListCache(userId, project._id, userTasks);
     res.status(200).json(new ApiSuccessResponse(true, 200, "Users tasks in this project are fetched", userTasks));
 });
 export const getTask = asyncHandler(async (req, res) => {
@@ -183,9 +165,6 @@ export const updateTask = asyncHandler(async (req, res) => {
     if (!updatedTask) {
         throw new ApiErrorResponse(400, "error updating task");
     }
-    await invalidateProjectOverviewCache(project._id);
-    await invalidateProjectTasksListCache(project._id);
-    await invalidateUserTasksListCache(assignedUser, project._id);
     res.status(201).json(new ApiSuccessResponse(true, 201, "Task created successfully", updatedTask));
 });
 export const changeTaskStatus = asyncHandler(async (req, res) => {
@@ -213,9 +192,6 @@ export const changeTaskStatus = asyncHandler(async (req, res) => {
     if (!updatedStatusTask) {
         throw new ApiErrorResponse(400, "Error updating the status");
     }
-    await invalidateProjectOverviewCache(project._id);
-    await invalidateProjectTasksListCache(project._id);
-    await invalidateUserTasksListCache(updatedStatusTask.assignedTo, project._id);
     res.status(200).json(new ApiSuccessResponse(true, 200, "task's status change successfully", updatedStatusTask));
 });
 export const deleteTask = asyncHandler(async (req, res) => {
@@ -241,8 +217,5 @@ export const deleteTask = asyncHandler(async (req, res) => {
     if (!deletedTask) {
         throw new ApiErrorResponse(400, "Unable to delete task");
     }
-    await invalidateProjectOverviewCache(project._id);
-    await invalidateProjectTasksListCache(project._id);
-    await invalidateUserTasksListCache(deletedTask.assignedTo, project._id);
     res.status(200).json(new ApiSuccessResponse(true, 200, "task deleted successfully", deletedTask));
 });

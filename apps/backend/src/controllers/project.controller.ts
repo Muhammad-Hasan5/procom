@@ -7,16 +7,6 @@ import { Request, Response } from "express";
 import { asyncHandler } from "../utils/async-handler.js";
 import { Types } from "mongoose";
 import { ProjectDocument } from "../types/ProjectsModel.types.js";
-import {
-	getprojectListCache,
-	invalidateProjectListCache,
-	setProjectListCache,
-} from "../cache/projects/projectList.cache.js";
-import {
-	getProjectOverviewCache,
-	invalidateProjectOverviewCache,
-	setProjectOverviewCache,
-} from "../cache/projects/projectOverview.cache.js";
 import { buildProjectOverviewFromDB } from "../services/project.services.js";
 
 export const createProject = asyncHandler(
@@ -41,8 +31,6 @@ export const createProject = asyncHandler(
 		}
 
 		await project.save();
-
-		await invalidateProjectListCache(req.user?._id);
 
 		return res
 			.status(201)
@@ -78,7 +66,6 @@ export const getSingleProject = asyncHandler(
 	},
 );
 
-//"DONE" refactor according to redis cache
 export const getUserProjects = asyncHandler(
 	async (req: Request, res: Response) => {
 		if (!req.user?._id || !Types.ObjectId.isValid(req.user._id)) {
@@ -99,19 +86,6 @@ export const getUserProjects = asyncHandler(
 				{ score: { $meta: "textScore" } },
 			).sort({ score: { $meta: "textScore" } });
 		} else {
-			const cached = await getprojectListCache(userId);
-			if (cached) {
-				return res
-					.status(200)
-					.json(
-						new ApiSuccessResponse<object>(
-							true,
-							200,
-							"Project found",
-							JSON.parse(cached),
-						),
-					);
-			}
 			projects = await Project.find({
 				owner: userId,
 			});
@@ -120,8 +94,6 @@ export const getUserProjects = asyncHandler(
 		if (!projects) {
 			throw new ApiErrorResponse(404, "Project not found");
 		}
-
-		await setProjectListCache(userId, projects);
 
 		res.status(200).json(
 			new ApiSuccessResponse<ProjectDocument[]>(
@@ -134,7 +106,6 @@ export const getUserProjects = asyncHandler(
 	},
 );
 
-//"DONE" refactor according to redis cache
 export const updateProject = asyncHandler(
 	async (req: Request, res: Response) => {
 		if (!req.user?._id || !Types.ObjectId.isValid(req.user._id)) {
@@ -195,9 +166,6 @@ export const updateProject = asyncHandler(
 			throw new ApiErrorResponse(400, "unable to update the project");
 		}
 
-		await invalidateProjectListCache(userId);
-		await invalidateProjectOverviewCache(projectId);
-
 		res.status(200).json(
 			new ApiSuccessResponse<ProjectDocument>(
 				true,
@@ -209,7 +177,6 @@ export const updateProject = asyncHandler(
 	},
 );
 
-//"DONE" refactor according to redis cache
 export const deleteProject = asyncHandler(
 	async (req: Request, res: Response) => {
 		if (!req.user?._id || !Types.ObjectId.isValid(req.user._id)) {
@@ -250,9 +217,6 @@ export const deleteProject = asyncHandler(
 				"project have no notes or error deleting",
 			);
 		}
-
-		await invalidateProjectListCache(userId);
-		await invalidateProjectOverviewCache(projectId);
 
 		res.status(200).json(
 			new ApiSuccessResponse<object>(
@@ -308,8 +272,6 @@ export const addMemberToProject = asyncHandler(
 		await project.save();
 
 		await project.populate([{ path: "owner" }, { path: "members" }]);
-
-		await invalidateProjectOverviewCache(project._id);
 
 		res.status(200).json(
 			new ApiSuccessResponse<ProjectDocument>(
@@ -367,8 +329,6 @@ export const removeMemberFromProject = asyncHandler(
 		await project.save();
 		await project.populate([{ path: "owner" }, { path: "members" }]);
 
-		await invalidateProjectOverviewCache(project._id);
-
 		res.status(200).json(
 			new ApiSuccessResponse(
 				true,
@@ -393,43 +353,26 @@ export const getProjectOverview = asyncHandler(
 		const userId = req.user._id;
 		const projectId = req.project._id;
 
-		const cached = await getProjectOverviewCache(projectId);
+		const projectOverview = await buildProjectOverviewFromDB(
+			userId,
+			projectId,
+		);
 
-		if (!cached) {
-			const projectOverview = await buildProjectOverviewFromDB(
-				userId,
-				projectId,
+		if (!projectOverview) {
+			throw new ApiErrorResponse(
+				409,
+				"Unable to build project overview from DB",
 			);
-
-			if (!projectOverview) {
-				throw new ApiErrorResponse(
-					409,
-					"Unable to build project overview from DB",
-				);
-			}
-
-			await setProjectOverviewCache(projectId, projectOverview);
-
-			return res
-				.status(201)
-				.json(
-					new ApiSuccessResponse<object>(
-						true,
-						201,
-						"Project overview build",
-						projectOverview,
-					),
-				);
 		}
 
 		return res
-			.status(200)
+			.status(201)
 			.json(
-				new ApiSuccessResponse(
+				new ApiSuccessResponse<object>(
 					true,
-					200,
-					"project overview sended",
-					JSON.parse(cached),
+					201,
+					"Project overview build",
+					projectOverview,
 				),
 			);
 	},
