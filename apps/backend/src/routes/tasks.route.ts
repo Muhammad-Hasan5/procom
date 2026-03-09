@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
 	createTask,
 	getProjectTasks,
+	getProjectTasksList,
 	getUserTasks,
 	getTask,
 	updateTask,
@@ -33,6 +34,10 @@ router
 		canAccessTask,
 		getUserTasks,
 	);
+
+router
+	.route("/projects/:projectId/tasks/list")
+	.get(authMiddleware, canAccessProject, getProjectTasksList);
 
 router
 	.route("/projects/:projectId/tasks/:taskId")

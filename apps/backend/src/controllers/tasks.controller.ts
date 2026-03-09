@@ -65,7 +65,7 @@ export const createTask = asyncHandler(async (req: Request, res: Response) => {
 		description,
 		project: project._id,
 		status,
-		assignedTo: assignedUser._id,
+		assignedTo: assignedUser?._id,
 		createdBy: userId,
 	});
 
@@ -111,19 +111,40 @@ export const getProjectTasks = asyncHandler(
 			},
 		]);
 
-		if (!tasks.length) {
-			throw new ApiErrorResponse(
-				400,
-				"prject has no tasks or error fetching tasks",
-			);
+		res.status(200).json(
+			new ApiSuccessResponse<{ _id: string; count: number }[]>(
+				true,
+				200,
+				"Project task counts by status",
+				tasks,
+			),
+		);
+	},
+);
+
+/** Returns full task list for Kanban (all tasks in project). */
+export const getProjectTasksList = asyncHandler(
+	async (req: Request, res: Response) => {
+		if (!req.user?._id || !Types.ObjectId.isValid(req.user._id)) {
+			throw new ApiErrorResponse(400, "Invalid user ID");
 		}
+
+		if (!req.project?._id || !Types.ObjectId.isValid(req.project._id)) {
+			throw new ApiErrorResponse(400, "Invalid project ID");
+		}
+
+		const projectId = req.project._id;
+		const taskList = await Task.find({ project: projectId })
+			.populate("assignedTo", "fullname email username")
+			.populate("createdBy", "fullname email username")
+			.sort({ createdAt: -1 });
 
 		res.status(200).json(
 			new ApiSuccessResponse<TaskDocument[]>(
 				true,
 				200,
-				"All project tasks fetched",
-				tasks,
+				"Project tasks list",
+				taskList as TaskDocument[],
 			),
 		);
 	},

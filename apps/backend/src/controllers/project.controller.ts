@@ -55,6 +55,11 @@ export const getSingleProject = asyncHandler(
 			throw new ApiErrorResponse(400, "Invalid project ID");
 		}
 
+		await req.project.populate([
+			{ path: "owner", select: "fullname email username" },
+			{ path: "members", select: "fullname email username" },
+		]);
+
 		res.status(200).json(
 			new ApiSuccessResponse<ProjectDocument>(
 				true,
