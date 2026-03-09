@@ -38,9 +38,6 @@ export const getNotes = asyncHandler(async (req, res) => {
     else {
         notes = await Note.find({ project: req.project?._id }).populate("user");
     }
-    if (!notes.length) {
-        throw new ApiErrorResponse(404, "User either have no notes or there is problem while fetching");
-    }
     return res
         .status(200)
         .json(new ApiSuccessResponse(true, 200, "Notes are fetched successfully", notes));
