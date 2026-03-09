@@ -12,8 +12,7 @@ export const taskValidator = () => {
             .isString()
             .withMessage("Description must be a string"),
         body("assignedTo")
-            .notEmpty()
-            .withMessage("assignedTo is required")
+            .optional()
             .isEmail()
             .withMessage("assignedTo must be a valid email")
             .bail()

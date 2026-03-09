@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createTask, getProjectTasks, getUserTasks, getTask, updateTask, deleteTask, changeTaskStatus, } from "../controllers/tasks.controller.js";
+import { createTask, getProjectTasks, getProjectTasksList, getUserTasks, getTask, updateTask, deleteTask, changeTaskStatus, } from "../controllers/tasks.controller.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { validate } from "../middlewares/validators.middleware.js";
 import { taskValidator } from "../validators/tasks.validator.js";
@@ -11,6 +11,9 @@ router
     .post(authMiddleware, canAccessProject, taskValidator(), validate, createTask)
     .get(authMiddleware, canAccessProject, getProjectTasks)
     .get(authMiddleware, canAccessProject, canAccessTask, getUserTasks);
+router
+    .route("/projects/:projectId/tasks/list")
+    .get(authMiddleware, canAccessProject, getProjectTasksList);
 router
     .route("/projects/:projectId/tasks/:taskId")
     .get(authMiddleware, canAccessProject, canAccessTask, getTask)
