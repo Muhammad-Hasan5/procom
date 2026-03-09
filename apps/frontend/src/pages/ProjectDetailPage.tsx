@@ -109,7 +109,7 @@ export default function ProjectDetailPage() {
           ))}
         </div>
 
-        <div className="min-h-[400px]">
+        <div className="min-h-400px">
           {tab === "overview" && (
             <ProjectOverview projectId={projectId} project={project} />
           )}

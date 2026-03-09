@@ -94,7 +94,7 @@ function DropdownMenuContent({
       ref={ref}
       role="menu"
       className={cn(
-        "absolute z-50 mt-1 min-w-[8rem] rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-md",
+        "absolute z-50 mt-1 min-w-32 rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-md",
         alignClass,
         "top-full",
         className,

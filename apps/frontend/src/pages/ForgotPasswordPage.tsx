@@ -26,7 +26,7 @@ export default function ForgotPasswordPage() {
         </div>
       </div>
       <div className="relative hidden bg-muted lg:block">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-primary/5" />
+        <div className="absolute inset-0 bg-linear-to-br from-primary/10 via-background to-primary/5" />
       </div>
     </div>
   );

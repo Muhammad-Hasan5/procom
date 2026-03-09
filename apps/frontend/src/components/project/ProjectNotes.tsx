@@ -239,7 +239,7 @@ export function ProjectNotes({ projectId }: { projectId: string }) {
           </CardHeader>
           <CardContent>
             <textarea
-              className="min-h-[400px] w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50"
+              className="min-h-400px w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50"
               value={activeNoteId === activeNote._id ? activeContent : activeNote.content ?? ""}
               onChange={(e) => {
                 if (activeNoteId === activeNote._id) setActiveContent(e.target.value);
@@ -252,7 +252,7 @@ export function ProjectNotes({ projectId }: { projectId: string }) {
       )}
 
       {!activeNote && notes.length > 0 && (
-        <Card className="flex-1 flex items-center justify-center min-h-[200px]">
+        <Card className="flex-1 flex items-center justify-center min-h-200px">
           <CardContent className="text-center text-muted-foreground text-sm">
             Select a note to view and edit
           </CardContent>

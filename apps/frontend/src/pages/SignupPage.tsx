@@ -8,10 +8,10 @@ export default function SignupPage() {
       <div className="flex flex-col gap-8 p-8 md:p-12 lg:p-16">
         <div className="flex justify-center lg:justify-start">
           <Link to="/" className="flex items-center gap-3 font-bold text-2xl">
-            <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg">
+            <div className="flex size-10 items-center justify-center rounded-xl bg-linear-to-br from-primary to-primary/80 text-primary-foreground shadow-lg">
               <GalleryVerticalEnd className="size-5" />
             </div>
-            <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
               ProCom
             </span>
           </Link>
@@ -30,8 +30,8 @@ export default function SignupPage() {
           </div>
         </div>
       </div>
-      <div className="hidden lg:block relative bg-gradient-to-br from-primary/5 via-background to-primary/10">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary/5" />
+      <div className="hidden lg:block relative bg-linear-to-br from-primary/5 via-background to-primary/10">
+        <div className="absolute inset-0 bg-linear-to-br from-primary/10 via-transparent to-primary/5" />
         <div className="absolute inset-0 flex items-center justify-center p-16">
           <div className="text-center space-y-6 max-w-md">
             <div className="space-y-4">
